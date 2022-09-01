@@ -1,22 +1,33 @@
-import { StatusBar } from 'expo-status-bar';
+
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Welcome } from './src/components/Welcome';
+import AppLoading from 'expo-app-loading';
+import { ThemeProvider } from 'styled-components';
+
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
+
+import theme from './src/global/styles/theme'
+import { Dashboard } from './src/screens/Dashboard';
+
 
 export default function App() {
+  const [ fontsLoaded ] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_700Bold,
+  });
+
+  if(!fontsLoaded){
+    return <AppLoading />
+  }
   return (
-    <View style={styles.container}>
-      <Welcome title="React native Bare Workflow com Typescript"/>
-      <StatusBar style="auto" />
-    </View>
+    <ThemeProvider theme={theme}>
+      <Dashboard/>
+    </ThemeProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
