@@ -12,6 +12,8 @@ import {
 
 import theme from './src/global/styles/theme'
 import { Dashboard } from './src/screens/Dashboard';
+import { Register } from './src/screens/Register';
+import { StatusBar } from 'expo-status-bar';
 
 
 export default function App() {
@@ -26,7 +28,9 @@ export default function App() {
   }
   return (
     <ThemeProvider theme={theme}>
-      <Dashboard/>
+      <StatusBar style='light'/>
+      {/* <Dashboard/> */}
+      <Register/>
     </ThemeProvider>
   );
 }
