@@ -1,5 +1,7 @@
 import React from "react";
 import { HighlightCard, HighlightCardProps } from "../../components/HighlightCard";
+import { TransactionProps, TransactionCard } from "../../components/TransactionCard";
+import { TransactionList } from "../../components/TransactionCard/styles";
 import {
     Container,
     Header,
@@ -11,11 +13,17 @@ import {
     UserInfo,
     UserName,
     UserWrapper,
+    Transactions,
+    Title
 } from "./styles";
+
+export interface DataListProps extends TransactionProps {
+    id: string;
+}
 
 export function Dashboard() {
 
-    const data: HighlightCardProps[] = [
+    const highlightCardData: HighlightCardProps[] = [
         {
             title: 'Entradas',
             amount: 'R$ 17.400,00',
@@ -34,6 +42,76 @@ export function Dashboard() {
             lastTransaction: '01 à 16 de abril',
             type: 'total'
         }
+    ]
+
+    const transactions: DataListProps[] = [
+        {
+            id: '1',
+            title: 'Desenvolvimento de site',
+            amount: 'R$ 12.000,00',
+            date: '13/04/2022',
+            type: 'income',
+            category: {
+                name: 'vendas',
+                icon: 'dollar-sign'
+            }
+        },
+        {
+            id: '2',
+            title: 'Hamburgueria Pizzy',
+            amount: 'R$ 59,00',
+            date: '10/04/2022',
+            type: 'outcome',
+            category: {
+                name: 'alimentação',
+                icon: 'coffee'
+            }
+        },
+        {
+            id: '3',
+            title: 'Desenvolvimento de site',
+            amount: 'R$ 12.000,00',
+            date: '13/04/2022',
+            type: 'income',
+            category: {
+                name: 'vendas',
+                icon: 'shopping-bag'
+            }
+        },
+        {
+            id: '4',
+            title: 'Hamburgueria Pizzy',
+            amount: 'R$ 59,00',
+            date: '10/04/2022',
+            type: 'outcome',
+            category: {
+                name: 'alimentação',
+                icon: 'dollar-sign'
+            }
+        },
+        {
+            id: '5',
+            title: 'Desenvolvimento de site',
+            amount: 'R$ 12.000,00',
+            date: '13/04/2022',
+            type: 'income',
+            category: {
+                name: 'vendas',
+                icon: 'dollar-sign'
+            }
+        },
+        {
+            id: '6',
+            title: 'Hamburgueria Pizzy',
+            amount: 'R$ 59,00',
+            date: '10/04/2022',
+            type: 'outcome',
+            category: {
+                name: 'alimentação',
+                icon: 'dollar-sign'
+            }
+        },
+
     ]
 
     return (
@@ -57,7 +135,7 @@ export function Dashboard() {
             </Header>
 
             <HighlightCards>
-                {data.map(item => (
+                {highlightCardData.map(item => (
                     <HighlightCard 
                         key={item.title}
                         type={item.type}
@@ -67,6 +145,16 @@ export function Dashboard() {
                     />  
                 ))}
             </HighlightCards>
+
+            <Transactions>
+                <Title>Listagem</Title>
+                <TransactionList
+                    data={transactions}
+                    keyExtractor={item => item.id}
+                    renderItem={({item}) => <TransactionCard transaction={item}/>}
+                />
+
+            </Transactions>
         </Container>
     )
 }
