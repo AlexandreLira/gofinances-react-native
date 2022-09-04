@@ -1,7 +1,7 @@
 import React from "react";
 import { HighlightCard, HighlightCardProps } from "../../components/HighlightCard";
 import { TransactionProps, TransactionCard } from "../../components/TransactionCard";
-import { TransactionList } from "../../components/TransactionCard/styles";
+
 import {
     Container,
     Header,
@@ -14,7 +14,8 @@ import {
     UserName,
     UserWrapper,
     Transactions,
-    Title
+    Title,
+    TransactionList
 } from "./styles";
 
 export interface DataListProps extends TransactionProps {

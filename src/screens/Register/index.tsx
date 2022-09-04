@@ -1,28 +1,48 @@
 import React, { useState } from 'react';
-import { Button } from '../../components/Form/Button';
+import { Modal } from 'react-native';
+
 import { Input } from '../../components/Form/Input';
+import { Button } from '../../components/Form/Button';
+import { Header } from '../../components/Header';
+import { CategorySelectButton } from '../../components/Form/CategorySelectButton';
 import { TransactionTypeButton } from '../../components/Form/TransactionTypeButton';
+
 import {
     Container,
-    Header,
-    Title,
     Form,
     Fields,
     TransactionTypes
 } from './styles';
+import { CategorySelect } from '../CategorySelect';
+
 export function Register() {
     const [transactionType, setTransactionType] = useState<'up' | 'down' | ''>('');
+    const [categoryModalOpen, setCategoryModalOpen] = useState<boolean>(false);
+    const [seletedCategory, setSeletedCategory] = useState({
+        key: 'category',
+        name: 'Categoria'
+    })
 
-    function handleTransactionTypeSelect(type: 'up' | 'down'){
+    function handleTransactionTypeSelect(type: 'up' | 'down') {
+        if (type === transactionType) {
+            setTransactionType('')
+            return
+        }
         setTransactionType(type)
     }
 
+    function handleOpenSelectCategoryModal() {
+        setCategoryModalOpen(true)
+    }
+    
+    function handleCloseSelectCategoryModal(){
+        setCategoryModalOpen(false)
+    }
+
+
     return (
         <Container>
-            <Header>
-                <Title>Cadastro</Title>
-            </Header>
-
+            <Header title="Cadastro" />
             <Form>
                 <Fields>
                     <Input
@@ -45,10 +65,25 @@ export function Register() {
                             onPress={() => handleTransactionTypeSelect('down')}
                         />
                     </TransactionTypes>
+                    <CategorySelectButton
+                        onPress={handleOpenSelectCategoryModal}
+                        title={seletedCategory.name}
+                    />
                 </Fields>
 
-                <Button title='Enviar' />
+                <Button title='Enviar'/>
             </Form>
+
+            <Modal
+                visible={categoryModalOpen}
+                animationType="slide"
+            >
+                <CategorySelect
+                    category={seletedCategory}
+                    setCategory={setSeletedCategory}
+                    closeSelectCategory={handleCloseSelectCategoryModal}
+                />
+            </Modal>
         </Container>
     )
 }
