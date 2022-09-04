@@ -1,7 +1,7 @@
 
 import React from 'react';
-import AppLoading from 'expo-app-loading';
 import { ThemeProvider } from 'styled-components';
+import { StatusBar } from 'expo-status-bar';
 
 import {
   useFonts,
@@ -13,7 +13,6 @@ import {
 import theme from './src/global/styles/theme'
 import { Dashboard } from './src/screens/Dashboard';
 import { Register } from './src/screens/Register';
-import { StatusBar } from 'expo-status-bar';
 
 
 export default function App() {
@@ -24,7 +23,7 @@ export default function App() {
   });
 
   if(!fontsLoaded){
-    return <AppLoading />
+    return null
   }
   return (
     <ThemeProvider theme={theme}>
