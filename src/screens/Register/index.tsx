@@ -107,7 +107,7 @@ export function Register() {
 
             await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY, dataFormatted)
         } catch (error) {
-            console.log(error)
+            console.warn(error)
             alert('Não foi possivel salvar a transação!')
         }
 
@@ -139,7 +139,6 @@ export function Register() {
     useEffect(() => {
         async function loadTransactions(){
             const data = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY) || '[]'
-            console.log(JSON.parse(data))
         }
         loadTransactions()
     },[]) 
