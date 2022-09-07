@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     Modal,
@@ -10,6 +10,8 @@ import {
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
+import uuid from 'react-native-uuid';
+import { useNavigation } from '@react-navigation/native'
 
 import { Button } from '../../components/Form/Button';
 import { Header } from '../../components/Header';
@@ -24,14 +26,16 @@ import {
 } from './styles';
 import { CategorySelect } from '../CategorySelect';
 import { InputForm } from '../../components/Form/InputForm';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TRANSACTION_STORAGE_KEY } from '../../utils/constants';
 
 interface FormData {
-    description: string;
+    title: string;
     amount: string;
 }
 
 const schema = yup.object({
-    description: yup
+    title: yup
         .string()
         .required('Descrição obrigatoria'),
     amount: yup
@@ -50,9 +54,12 @@ export function Register() {
         name: 'Selecione a categoria'
     })
 
+    const navigation = useNavigation()
+
     const {
         control,
         handleSubmit,
+        reset,
         formState: { errors }
     } = useForm({ resolver: yupResolver(schema) })
 
@@ -72,14 +79,48 @@ export function Register() {
         setCategoryModalOpen(false)
     }
 
+
+    function resetForm(){
+        setSeletedCategory({
+            key: 'withoutCategory',
+            name: 'Selecione a categoria'
+        })
+        setTransactionType('')
+        reset()
+    }
+
+    async function saveTransactionOnStorage(data: any) {
+        const newTransaction = {
+            id: String(uuid.v4()),
+            date: new Date(),
+            ...data,
+        }
+
+        try {
+            const storage = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+            const currentData = storage ? JSON.parse(storage) : []
+
+            const dataFormatted = JSON.stringify([
+                newTransaction,
+                ...currentData
+            ])
+
+            await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY, dataFormatted)
+        } catch (error) {
+            console.log(error)
+            alert('Não foi possivel salvar a transação!')
+        }
+
+    }
+
     function handleRegister(form: Partial<FormData>) {
-        const { description, amount } = form
+        const { title, amount } = form
 
         const data = {
-            description,
+            title: title!.trim(),
             amount,
             category: seletedCategory.key,
-            transactionType
+            type: transactionType
         }
 
         if (!transactionType) {
@@ -89,7 +130,20 @@ export function Register() {
             return Alert.alert('Selecione uma categoria!')
         }
 
+        saveTransactionOnStorage(data)
+        resetForm()
+        navigation.navigate('Listagem')
     }
+
+
+    useEffect(() => {
+        async function loadTransactions(){
+            const data = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY) || '[]'
+            console.log(JSON.parse(data))
+        }
+        loadTransactions()
+    },[]) 
+
 
 
     return (
@@ -102,10 +156,10 @@ export function Register() {
                         <InputForm
                             placeholder='Descrição'
                             control={control}
-                            name="description"
+                            name="title"
                             autoCapitalize='sentences'
                             autoCorrect={false}
-                            error={errors.description && String(errors.description.message)}
+                            error={errors.title && String(errors.title.message)}
                         />
                         <InputForm
                             placeholder='Valor'

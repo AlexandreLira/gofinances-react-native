@@ -1,13 +1,16 @@
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from "react";
 import { HighlightCard, HighlightCardProps } from "../../components/HighlightCard";
 import { TransactionProps, TransactionCard } from "../../components/TransactionCard";
+import { TRANSACTION_STORAGE_KEY } from "../../utils/constants";
 
 import {
     Container,
     Header,
     HighlightCards,
     Photo,
-    PowerIcon,
+    Icon,
     User,
     UserGreeting,
     UserInfo,
@@ -15,105 +18,133 @@ import {
     UserWrapper,
     Transactions,
     Title,
-    TransactionList
+    TransactionList,
+    LogoutButton
 } from "./styles";
 
 export interface DataListProps extends TransactionProps {
     id: string;
 }
 
+interface HighlightProps {
+    amount: number,
+    message: string
+}
+interface HighlightDataProps {
+    total: HighlightProps
+    income: HighlightProps
+    outcome: HighlightProps
+}
+
 export function Dashboard() {
 
-    const highlightCardData: HighlightCardProps[] = [
-        {
-            title: 'Entradas',
-            amount: 'R$ 17.400,00',
-            lastTransaction: 'Últimas entradas dia 13 de abril',
-            type: 'up'
+    const [transactions, setTransactions] = useState<DataListProps[]>([])
+    const [highlightData, setHighlightData] = useState({
+        total: {
+            amount: 0,
+            message: 'Sem transações'
         },
-        {
-            title: 'Saídas',
-            amount: 'R$ 1.259,00',
-            lastTransaction: 'Últimas entradas dia 13 de abril',
-            type: 'down',
+        income: {
+            amount: 0,
+            message: 'Sem transações'
         },
-        {
-            title: 'Total',
-            amount: 'R$ 16.141,00',
-            lastTransaction: '01 à 16 de abril',
-            type: 'total'
+        outcome: {
+            amount: 0,
+            message: 'Sem transações'
         }
-    ]
+    })
 
-    const transactions: DataListProps[] = [
-        {
-            id: '1',
-            title: 'Desenvolvimento de site',
-            amount: 'R$ 12.000,00',
-            date: '13/04/2022',
-            type: 'income',
-            category: {
-                name: 'vendas',
-                icon: 'dollar-sign'
-            }
-        },
-        {
-            id: '2',
-            title: 'Hamburgueria Pizzy',
-            amount: 'R$ 59,00',
-            date: '10/04/2022',
-            type: 'outcome',
-            category: {
-                name: 'alimentação',
-                icon: 'coffee'
-            }
-        },
-        {
-            id: '3',
-            title: 'Desenvolvimento de site',
-            amount: 'R$ 12.000,00',
-            date: '13/04/2022',
-            type: 'income',
-            category: {
-                name: 'vendas',
-                icon: 'shopping-bag'
-            }
-        },
-        {
-            id: '4',
-            title: 'Hamburgueria Pizzy',
-            amount: 'R$ 59,00',
-            date: '10/04/2022',
-            type: 'outcome',
-            category: {
-                name: 'alimentação',
-                icon: 'dollar-sign'
-            }
-        },
-        {
-            id: '5',
-            title: 'Desenvolvimento de site',
-            amount: 'R$ 12.000,00',
-            date: '13/04/2022',
-            type: 'income',
-            category: {
-                name: 'vendas',
-                icon: 'dollar-sign'
-            }
-        },
-        {
-            id: '6',
-            title: 'Hamburgueria Pizzy',
-            amount: 'R$ 59,00',
-            date: '10/04/2022',
-            type: 'outcome',
-            category: {
-                name: 'alimentação',
-                icon: 'dollar-sign'
-            }
-        },
 
-    ]
+    function getLastTransaction(
+        transactions: DataListProps[],
+        type: 'down' | 'up'
+    ) {
+        let dateTime = 0
+
+        transactions.forEach(transaction => {
+            if (transaction.type === type) {
+                const time = new Date(transaction.date).getTime()
+                dateTime = Math.max(time, dateTime)
+            }
+        })
+
+        if (!Boolean(dateTime)) {
+            return 'Sem transações'
+        }
+
+        const date = new Date(dateTime)
+        const formattedDate = Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: 'long'
+
+        }).format(date)
+
+        return formattedDate
+    }
+
+    async function loadTransactions() {
+        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+        const data = response ? JSON.parse(response) : []
+
+        const totalizer = {
+            total: {
+                amount: 0,
+                message: ''
+            },
+            income: {
+                amount: 0,
+                message: ''
+            },
+            outcome: {
+                amount: 0,
+                message: ''
+            },
+
+        }
+
+        const transactionsFormatted = data.map((item: DataListProps) => {
+            const date = Intl.DateTimeFormat('pt-BR', {
+                dateStyle: 'short'
+            }).format(new Date(item.date))
+
+            const amount = Number(item.amount)
+                .toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                })
+
+            if (item.type === 'up') {
+                totalizer.income.amount += Number(item.amount)
+                totalizer.total.amount += Number(item.amount)
+
+            } else if (item.type === 'down') {
+                totalizer.outcome.amount -= Number(item.amount)
+                totalizer.total.amount -= Number(item.amount)
+            }
+
+            return {
+                ...item,
+                date,
+                amount
+            }
+        })
+
+        totalizer.income.message = getLastTransaction(data, 'up')
+        totalizer.outcome.message = getLastTransaction(data, 'down')
+        totalizer.total.message = `01 á ${totalizer.outcome.message}`
+        setHighlightData(totalizer)
+        setTransactions(transactionsFormatted)
+
+    }
+
+    useEffect(() => {
+        loadTransactions()
+    }, [])
+
+    useFocusEffect(useCallback(() => {
+        loadTransactions();
+    }, []));
+
 
     return (
         <Container>
@@ -130,21 +161,35 @@ export function Dashboard() {
                         </User>
                     </UserInfo>
 
-                    <PowerIcon name="power"/>
-                    
+                    <LogoutButton onPress={() => { console.log('fakh') }}>
+                        <Icon name="power" />
+                    </LogoutButton>
+
                 </UserWrapper>
             </Header>
 
             <HighlightCards>
-                {highlightCardData.map(item => (
-                    <HighlightCard 
-                        key={item.title}
-                        type={item.type}
-                        title={item.title}
-                        amount={item.amount}
-                        lastTransaction={item.lastTransaction}
-                    />  
-                ))}
+                <HighlightCard
+                    type='up'
+                    title='Entradas'
+                    amount={String(highlightData.income.amount)}
+                    lastTransaction={highlightData.income.message}
+                />
+
+                <HighlightCard
+                    type='up'
+                    title='Entradas'
+                    amount={String(highlightData.outcome.amount)}
+                    lastTransaction={highlightData.outcome.message}
+                />
+
+                <HighlightCard
+                    type='total'
+                    title='Entradas'
+                    amount={String(highlightData.total.amount)}
+                    lastTransaction={highlightData.total.message}
+                />
+
             </HighlightCards>
 
             <Transactions>
@@ -152,7 +197,7 @@ export function Dashboard() {
                 <TransactionList
                     data={transactions}
                     keyExtractor={item => item.id}
-                    renderItem={({item}) => <TransactionCard transaction={item}/>}
+                    renderItem={({ item }) => <TransactionCard transaction={item} />}
                 />
 
             </Transactions>
