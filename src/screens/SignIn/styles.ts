@@ -7,14 +7,16 @@ export const Container = styled.View`
 
 export const Header = styled.View`
     width: 100%;
-    height: ${RFPercentage(70)}px;
+    height: ${RFPercentage(80)}px;
     background-color: ${({theme}) => theme.colors.primary};
     justify-content: flex-end;
     align-items: center;
 `;
 
 export const TitleWrapper = styled.View`
+    flex: 1;
     align-items: center;
+    justify-content: center;
 `;
 
 export const Title = styled.Text`
@@ -36,12 +38,17 @@ export const SignInTitle = styled.Text`
     
     text-align: center;
 
-    margin-top: ${RFValue(80)}px;
-    margin-bottom: ${RFValue(30)}px;
+    
+    margin-bottom: ${RFValue(67)}px;
 `;
 
 export const Footer = styled.View`
-flex: 1;
+    flex: 1;
     background-color: ${({theme}) => theme.colors.secondary};
+`;
+export const FooterWrapper = styled.View`
+    margin-top: ${RFPercentage(-4)}px;
+    padding: 0 32px;
 
+    justify-content: space-between;
 `;
