@@ -14,6 +14,7 @@ import {
 
 import theme from './src/global/styles/theme'
 import { Routes } from './src/routes';
+import { SignIn } from './src/screens/SignIn';
 
 
 export default function App() {
@@ -29,7 +30,8 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <StatusBar style='light'/>
-      <Routes/>
+      {/* <Routes/> */}
+      <SignIn/>
     </ThemeProvider>
   );
 }
