@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import uuid from 'react-native-uuid';
-import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native'
+
 
 import { Button } from '../../components/Form/Button';
 import { Header } from '../../components/Header';
@@ -23,11 +23,14 @@ import {
     Form,
     Fields,
     TransactionTypes
-} from './styles';
+} from '../Register/styles';
 import { CategorySelect } from '../CategorySelect';
 import { InputForm } from '../../components/Form/InputForm';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TRANSACTION_STORAGE_KEY } from '../../utils/constants';
+import { categories } from '../../utils/categories';
+import { DatePicker } from '../../components/DatePicker';
+import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 
 interface FormData {
     title: string;
@@ -46,22 +49,30 @@ const schema = yup.object({
         .required('Valor obrigatorio')
 }).required()
 
-export function Register() {
+export function EditTransaction({route}: any) {
+    const { transactionId } = route.params
+
     const [transactionType, setTransactionType] = useState<'up' | 'down' | ''>('');
-    const [categoryModalOpen, setCategoryModalOpen] = useState<boolean>(false);
+
+    const [date, setDate] = useState(new Date());
+    const [showDate, setShowDate] = useState(false);
+
+    const [categoryModalOpen, setCategoryModalOpen] = useState<boolean>(false)
     const [seletedCategory, setSeletedCategory] = useState({
         key: 'withoutCategory',
         name: 'Selecione a categoria'
     })
 
-    const navigation: NavigationProp<ParamListBase> = useNavigation()
-
     const {
         control,
         handleSubmit,
         reset,
-        formState: { errors }
+        formState: { errors },
+        setValue
     } = useForm({ resolver: yupResolver(schema) })
+
+    const navigation: NavigationProp<ParamListBase> = useNavigation()
+   
 
     function handleTransactionTypeSelect(type: 'up' | 'down') {
         if (type === transactionType) {
@@ -90,22 +101,17 @@ export function Register() {
     }
 
     async function saveTransactionOnStorage(data: any) {
-        const newTransaction = {
-            id: String(uuid.v4()),
-            date: new Date(),
-            ...data,
-        }
 
         try {
             const storage = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
             const currentData = storage ? JSON.parse(storage) : []
 
-            const dataFormatted = JSON.stringify([
-                newTransaction,
-                ...currentData
-            ])
+            const transactionIndex = currentData.findIndex((transaction: any) => transaction.id === data.id)
+        
+            currentData[transactionIndex] = data
+            
 
-            await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY, dataFormatted)
+            await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY, JSON.stringify(currentData))
         } catch (error) {
             console.warn(error)
             alert('Não foi possivel salvar a transação!')
@@ -113,14 +119,16 @@ export function Register() {
 
     }
 
-    function handleRegister(form: Partial<FormData>) {
+    async function handleRegister(form: Partial<FormData>) {
         const { title, amount } = form
 
         const data = {
+            id: transactionId,
             title: title!.trim(),
-            amount,
+            type: transactionType,
             category: seletedCategory.key,
-            type: transactionType
+            amount,
+            date,
         }
 
         if (!transactionType) {
@@ -130,26 +138,46 @@ export function Register() {
             return Alert.alert('Selecione uma categoria!')
         }
 
-        saveTransactionOnStorage(data)
+        await saveTransactionOnStorage(data)
         resetForm()
-
-        navigation.navigate('Listagem')
+        navigation.navigate('Home')
     }
 
+    async function getTransaction(){
+        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+        const transactionsData = response ? JSON.parse(response) : []
+        const [transaction] = transactionsData.filter((transaction: any) => transaction.id === transactionId)
+        const [category] = categories.filter(category => transaction.category === category.key)
+        
+        setDate(new Date(transaction.date))
+        setTransactionType(transaction.type)
+        setValue('title', transaction.title)
+        setValue('amount', String(transaction.amount))
+
+        setSeletedCategory({
+            key: category.key,
+            name: category.name
+        })
+    }
+
+    function handleOnChangeDate(event: any){
+        const {nativeEvent, type} = event
+        if(type === 'set'){
+            const newDate = new Date(nativeEvent.timestamp)
+            setDate(newDate)
+            setShowDate(false)
+            
+        }
+    }
 
     useEffect(() => {
-        async function loadTransactions(){
-            const data = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY) || '[]'
-        }
-        loadTransactions()
-    },[]) 
-
-
+        getTransaction()
+    }, [])
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <Container>
-                <Header title="Cadastro" />
+                <Header title="Editar" />
                 <Form>
                     <Fields>
 
@@ -167,6 +195,13 @@ export function Register() {
                             name="amount"
                             keyboardType='numeric'
                             error={errors.amount && String(errors.amount.message)}
+                        />
+
+                        <DatePicker
+                            show={showDate}
+                            value={date}
+                            onPress={() => setShowDate(true)}
+                            onChange={handleOnChangeDate}
                         />
 
                         <TransactionTypes>

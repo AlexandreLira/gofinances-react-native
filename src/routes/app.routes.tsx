@@ -2,14 +2,31 @@ import React from "react";
 import { Platform } from "react-native";
 import { Feather } from '@expo/vector-icons'
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 
 import { Dashboard } from "../screens/Dashboard";
 import { Register } from "../screens/Register";
 import { Resume } from "../screens/Resume";
 
 import { useTheme } from "styled-components";
+import { EditTransaction } from "../screens/EditTransaction";
 
 const { Navigator, Screen } = createBottomTabNavigator();
+const Stack = createNativeStackNavigator()
+
+function Home() {
+    return (
+        <Stack.Navigator
+            screenOptions={{
+                headerShown: false
+            }}
+        >
+            <Stack.Screen name="Home" component={Dashboard} />
+            <Stack.Screen name="EditTransaction" component={EditTransaction} />
+        </Stack.Navigator>
+    )
+}
 
 export function AppRoutes() {
     const theme = useTheme();
@@ -28,7 +45,7 @@ export function AppRoutes() {
         >
             <Screen
                 name="Listagem"
-                component={Dashboard}
+                component={Home}
                 options={{
                     tabBarIcon: (({size, color}) => (
                         <Feather size={size} color={color} name="list"/> 

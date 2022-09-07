@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { categories } from '../../utils/categories';
 import {
@@ -12,6 +13,7 @@ import {
 } from './styles';
 
 export interface TransactionProps {
+    id: string;
     title: string;
     amount: string;
     type: 'down' | 'up';
@@ -26,6 +28,7 @@ interface TransactionCardProps {
 export function TransactionCard({ transaction }: TransactionCardProps) {
 
     const {
+        id,
         title,
         type,
         amount,
@@ -33,9 +36,10 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
     } = transaction
 
     const [category] = categories.filter(item => item.key === transaction.category)
+    const navigation = useNavigation()
 
     return (
-        <Container>
+        <Container onPress={() => navigation.navigate('EditTransaction', {transactionId: id})}>
             <Title>{title}</Title>
             <Amount 
                 type={type}

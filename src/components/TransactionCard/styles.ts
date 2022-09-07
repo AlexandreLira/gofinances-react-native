@@ -6,7 +6,7 @@ interface TransactionTypeProps {
     type: 'down' | 'up'
 }
 
-export const Container = styled.View`
+export const Container = styled.TouchableOpacity`
     background-color: ${({ theme }) => theme.colors.shape};
     border-radius: 5px;
     padding: 17px 24px;

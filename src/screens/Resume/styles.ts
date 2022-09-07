@@ -33,6 +33,7 @@ export const MonthSelect = styled.View`
 `;
 
 export const MonthSelectButton = styled.TouchableOpacity`
+    padding: 15px;
 `;
 
 export const SelectIcon = styled(Feather)`

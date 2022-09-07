@@ -10,7 +10,7 @@ export function CategorySelectButton({ title, ...rest }: CategorySelectButtonPro
     return (
         <Container {...rest}>
             <Category>{title}</Category>
-            <Icon name="keyboard-arrow-down" />
+            <Icon name="chevron-down" />
         </Container>
 
     )
