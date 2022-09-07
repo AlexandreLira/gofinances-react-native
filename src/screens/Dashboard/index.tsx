@@ -129,17 +129,13 @@ export function Dashboard() {
             }
         })
 
-        totalizer.income.message = getLastTransaction(data, 'up')
-        totalizer.outcome.message = getLastTransaction(data, 'down')
-        totalizer.total.message = `01 á ${totalizer.outcome.message}`
+        totalizer.income.message = `Última entrada dia ${getLastTransaction(data, 'up')}`
+        totalizer.outcome.message = `Última saída dia ${getLastTransaction(data, 'down')}`
+        totalizer.total.message = `01 á ${getLastTransaction(data, 'up')}`
         setHighlightData(totalizer)
         setTransactions(transactionsFormatted)
 
     }
-
-    useEffect(() => {
-        loadTransactions()
-    }, [])
 
     useFocusEffect(useCallback(() => {
         loadTransactions();
@@ -172,21 +168,30 @@ export function Dashboard() {
                 <HighlightCard
                     type='up'
                     title='Entradas'
-                    amount={String(highlightData.income.amount)}
+                    amount={highlightData.income.amount.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    })}
                     lastTransaction={highlightData.income.message}
                 />
 
                 <HighlightCard
-                    type='up'
-                    title='Entradas'
-                    amount={String(highlightData.outcome.amount)}
+                    type='down'
+                    title='Saídas'
+                    amount={highlightData.outcome.amount.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    })}
                     lastTransaction={highlightData.outcome.message}
                 />
 
                 <HighlightCard
                     type='total'
-                    title='Entradas'
-                    amount={String(highlightData.total.amount)}
+                    title='Total'
+                    amount={highlightData.total.amount.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    })}
                     lastTransaction={highlightData.total.message}
                 />
 
