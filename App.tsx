@@ -15,6 +15,7 @@ import {
 import theme from './src/global/styles/theme'
 import { Routes } from './src/routes';
 import { SignIn } from './src/screens/SignIn';
+import { AuthProvider } from './src/hooks/auth';
 
 
 export default function App() {
@@ -31,7 +32,9 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <StatusBar style='light'/>
       {/* <Routes/> */}
-      <SignIn/>
+      <AuthProvider>
+        <SignIn/>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
