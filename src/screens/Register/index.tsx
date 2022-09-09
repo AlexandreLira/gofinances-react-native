@@ -27,7 +27,8 @@ import {
 import { CategorySelect } from '../CategorySelect';
 import { InputForm } from '../../components/Form/InputForm';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TRANSACTION_STORAGE_KEY } from '../../utils/constants';
+import { TRANSACTION_STORAGE_KEY, TRANSACTION_STORAGE_KEY_BY_USER } from '../../utils/constants';
+import { useAuth } from '../../hooks/auth';
 
 interface FormData {
     title: string;
@@ -53,6 +54,7 @@ export function Register() {
         key: 'withoutCategory',
         name: 'Selecione a categoria'
     })
+    const { user } = useAuth()
 
     const navigation: NavigationProp<ParamListBase> = useNavigation()
 
@@ -80,7 +82,7 @@ export function Register() {
     }
 
 
-    function resetForm(){
+    function resetForm() {
         setSeletedCategory({
             key: 'withoutCategory',
             name: 'Selecione a categoria'
@@ -97,7 +99,7 @@ export function Register() {
         }
 
         try {
-            const storage = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+            const storage = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY_BY_USER + user.id)
             const currentData = storage ? JSON.parse(storage) : []
 
             const dataFormatted = JSON.stringify([
@@ -105,7 +107,7 @@ export function Register() {
                 ...currentData
             ])
 
-            await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY, dataFormatted)
+            await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY_BY_USER + user.id, dataFormatted)
         } catch (error) {
             console.warn(error)
             alert('Não foi possivel salvar a transação!')
@@ -113,7 +115,7 @@ export function Register() {
 
     }
 
-    function handleRegister(form: Partial<FormData>) {
+    async function handleRegister(form: Partial<FormData>) {
         const { title, amount } = form
 
         const data = {
@@ -130,7 +132,7 @@ export function Register() {
             return Alert.alert('Selecione uma categoria!')
         }
 
-        saveTransactionOnStorage(data)
+        await saveTransactionOnStorage(data)
         resetForm()
 
         navigation.navigate('Listagem')
@@ -138,11 +140,11 @@ export function Register() {
 
 
     useEffect(() => {
-        async function loadTransactions(){
+        async function loadTransactions() {
             const data = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY) || '[]'
         }
         loadTransactions()
-    },[]) 
+    }, [])
 
 
 

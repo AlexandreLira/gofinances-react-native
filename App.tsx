@@ -1,7 +1,7 @@
 import 'intl'
 import 'intl/locale-data/jsonp/pt-BR'
 
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { StatusBar } from 'expo-status-bar';
 
@@ -14,27 +14,47 @@ import {
 
 import theme from './src/global/styles/theme'
 import { Routes } from './src/routes';
-import { SignIn } from './src/screens/SignIn';
-import { AuthProvider } from './src/hooks/auth';
+import { AuthProvider, useAuth } from './src/hooks/auth';
+import * as SplashScreen from 'expo-splash-screen';
+import { View } from 'react-native';
 
 
 export default function App() {
+  const { userStorageLoading } = useAuth()
+
   const [ fontsLoaded ] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_700Bold,
   });
 
-  if(!fontsLoaded){
-    return null
+  useEffect(() => {
+    async function prepare() {
+      await SplashScreen.preventAutoHideAsync();
+    }
+    
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+  
+  if (!fontsLoaded || userStorageLoading) {
+    return null;
   }
+
   return (
-    <ThemeProvider theme={theme}>
-      <StatusBar style='light'/>
-      <AuthProvider>
-        <Routes/>
-      </AuthProvider>
-    </ThemeProvider>
+    <View onLayout={onLayoutRootView} style={{flex: 1}}>
+      <ThemeProvider theme={theme}>
+        <StatusBar style='light'/>
+        <AuthProvider>
+          <Routes/>
+        </AuthProvider>
+      </ThemeProvider>
+    </View>
   );
 }
 

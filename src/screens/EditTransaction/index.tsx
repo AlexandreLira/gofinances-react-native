@@ -27,10 +27,11 @@ import {
 import { CategorySelect } from '../CategorySelect';
 import { InputForm } from '../../components/Form/InputForm';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TRANSACTION_STORAGE_KEY } from '../../utils/constants';
+import { TRANSACTION_STORAGE_KEY_BY_USER } from '../../utils/constants'
 import { categories } from '../../utils/categories';
 import { DatePicker } from '../../components/DatePicker';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../hooks/auth';
 
 interface FormData {
     title: string;
@@ -62,6 +63,7 @@ export function EditTransaction({route}: any) {
         key: 'withoutCategory',
         name: 'Selecione a categoria'
     })
+    const { user } = useAuth()
 
     const {
         control,
@@ -103,15 +105,14 @@ export function EditTransaction({route}: any) {
     async function saveTransactionOnStorage(data: any) {
 
         try {
-            const storage = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+            const storage = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY_BY_USER+user.id)
             const currentData = storage ? JSON.parse(storage) : []
 
             const transactionIndex = currentData.findIndex((transaction: any) => transaction.id === data.id)
         
             currentData[transactionIndex] = data
-            
 
-            await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY, JSON.stringify(currentData))
+            await AsyncStorage.setItem(TRANSACTION_STORAGE_KEY_BY_USER+user.id, JSON.stringify(currentData))
         } catch (error) {
             console.warn(error)
             alert('Não foi possivel salvar a transação!')
@@ -144,7 +145,7 @@ export function EditTransaction({route}: any) {
     }
 
     async function getTransaction(){
-        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY_BY_USER+user.id)
         const transactionsData = response ? JSON.parse(response) : []
         const [transaction] = transactionsData.filter((transaction: any) => transaction.id === transactionId)
         const [category] = categories.filter(category => transaction.category === category.key)

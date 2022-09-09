@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { HighlightCard, HighlightCardProps } from "../../components/HighlightCard";
 import { TransactionProps, TransactionCard } from "../../components/TransactionCard";
 import { useAuth } from "../../hooks/auth";
-import { TRANSACTION_STORAGE_KEY } from "../../utils/constants";
+import { TRANSACTION_STORAGE_KEY, TRANSACTION_STORAGE_KEY_BY_USER } from "../../utils/constants";
 
 import {
     Container,
@@ -57,7 +57,7 @@ export function Dashboard() {
     const [transactions, setTransactions] = useState<DataListProps[]>([])
     const [highlightData, setHighlightData] = useState(highlightDataDefault)
 
-    const { user, logout } = useAuth()
+    const { user, signOut } = useAuth()
 
 
     function getLastTransaction(
@@ -88,7 +88,7 @@ export function Dashboard() {
     }
 
     async function loadTransactions() {
-        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY_BY_USER+user.id)
         const data = response ? JSON.parse(response) : []
 
         const totalizer = {
@@ -162,7 +162,7 @@ export function Dashboard() {
                         </User>
                     </UserInfo>
 
-                    <LogoutButton onPress={logout}>
+                    <LogoutButton onPress={signOut}>
                         <Icon name="power" />
                     </LogoutButton>
 

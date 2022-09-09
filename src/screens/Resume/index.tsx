@@ -11,7 +11,7 @@ import { CategoryCard } from '../../components/CategoryCard';
 import { TransactionProps } from '../../components/TransactionCard';
 
 import { categories } from '../../utils/categories';
-import { TRANSACTION_STORAGE_KEY } from '../../utils/constants';
+import { TRANSACTION_STORAGE_KEY, TRANSACTION_STORAGE_KEY_BY_USER } from '../../utils/constants';
 
 import {
     ChartContainer,
@@ -26,6 +26,7 @@ import {
 } from './styles';
 import { useTheme } from 'styled-components';
 import { useFocusEffect } from '@react-navigation/native';
+import { useAuth } from '../../hooks/auth';
 
 interface CategoriesResumeProps {
     key: string
@@ -42,6 +43,7 @@ export function Resume() {
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const theme = useTheme()
+    const { user } = useAuth()
 
     function handleDateChange(action: 'next' | 'prev') {
         if (action === 'next') {
@@ -56,7 +58,7 @@ export function Resume() {
     async function loadTransactions() {
         setIsLoadingTransactions(true)
 
-        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY)
+        const response = await AsyncStorage.getItem(TRANSACTION_STORAGE_KEY_BY_USER + user.id)
 
         const transactions: TransactionProps[] = response ? JSON.parse(response) : []
 
@@ -115,7 +117,7 @@ export function Resume() {
 
             {isLoadingTransactions ? (
                 <LoadContainer>
-                    <Loading  size="large" color={theme.colors.primary}/>
+                    <Loading size="large" color={theme.colors.primary} />
                 </LoadContainer>
             ) : (
                 <Content>
