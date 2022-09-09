@@ -3,6 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
 import { HighlightCard, HighlightCardProps } from "../../components/HighlightCard";
 import { TransactionProps, TransactionCard } from "../../components/TransactionCard";
+import { useAuth } from "../../hooks/auth";
 import { TRANSACTION_STORAGE_KEY } from "../../utils/constants";
 
 import {
@@ -36,23 +37,27 @@ interface HighlightDataProps {
     outcome: HighlightProps
 }
 
+const highlightDataDefault = {
+    total: {
+        amount: 0,
+        message: 'Sem transações'
+    },
+    income: {
+        amount: 0,
+        message: 'Sem transações'
+    },
+    outcome: {
+        amount: 0,
+        message: 'Sem transações'
+    }
+}
+
 export function Dashboard() {
 
     const [transactions, setTransactions] = useState<DataListProps[]>([])
-    const [highlightData, setHighlightData] = useState({
-        total: {
-            amount: 0,
-            message: 'Sem transações'
-        },
-        income: {
-            amount: 0,
-            message: 'Sem transações'
-        },
-        outcome: {
-            amount: 0,
-            message: 'Sem transações'
-        }
-    })
+    const [highlightData, setHighlightData] = useState(highlightDataDefault)
+
+    const { user, logout } = useAuth()
 
 
     function getLastTransaction(
@@ -149,15 +154,15 @@ export function Dashboard() {
 
                     <UserInfo>
                         <Photo
-                            source={{ uri: 'https://avatars.githubusercontent.com/u/58709086?v=4' }}
+                            source={{ uri: user.photo }}
                         />
                         <User>
                             <UserGreeting>Olá,</UserGreeting>
-                            <UserName>Alexandre</UserName>
+                            <UserName>{user.name}</UserName>
                         </User>
                     </UserInfo>
 
-                    <LogoutButton onPress={() => { console.log('fakh') }}>
+                    <LogoutButton onPress={logout}>
                         <Icon name="power" />
                     </LogoutButton>
 

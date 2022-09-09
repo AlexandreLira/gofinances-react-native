@@ -31,9 +31,8 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <StatusBar style='light'/>
-      {/* <Routes/> */}
       <AuthProvider>
-        <SignIn/>
+        <Routes/>
       </AuthProvider>
     </ThemeProvider>
   );
