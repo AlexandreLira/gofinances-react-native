@@ -186,6 +186,7 @@ export function Register() {
                             />
                         </TransactionTypes>
                         <CategorySelectButton
+                            testID='button-category'
                             onPress={handleOpenSelectCategoryModal}
                             title={seletedCategory.name}
                         />
@@ -198,6 +199,7 @@ export function Register() {
                 </Form>
 
                 <Modal
+                    testID='modal-category'
                     visible={categoryModalOpen}
                     animationType="slide"
                 >
